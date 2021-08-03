@@ -23,6 +23,9 @@ from pynput.keyboard import Key, Controller
 keyboard = Controller()
 
 
+class Notifications():
+    pass
+
 class mouse():
     def leftClick(x, y):
         win32api.mouse_event(win32con.MOUSEEVENTF_LEFTDOWN,x,y)
@@ -157,15 +160,22 @@ def main():
     # Get paths and arguments
     getTesseractPath()
     parser = argparse.ArgumentParser(description='A bot that will continue attempting to join The Isle servers until it gets in.')
-    parser.add_argument('--server', metavar='S', type=str, required=True, nargs=1,
+    parser.add_argument('SERVER', type=str, nargs=1,
                         help='The name of the server you want to queue up')
-    parser.add_argument('--sms', type=int,
-                        help='10-digit phone number you want an SMS notification sent to when successfully connected to the server')
-    parser.add_argument('--email', type=str,
+    parser.add_argument('--sms', nargs=1, type=int,
+                        help='10-digit phone number you want an SMS notification sent to when successfully connected to the server - Currently supports: Verizon, AT&T, T-Mobile, and Google Voice numbers ONLY')
+    parser.add_argument('--email', nargs=1, type=str,
                         help='Email address you want a notification sent to when successfully connected to the server')
 
     args = parser.parse_args()
     
+    # Set up notifications
+    if args.sms:
+        pass
+
+    if args.email:
+        pass    
+
     # Start the game and wait for the disclaimer
     print('Launching The Isle')
     launchGame()
