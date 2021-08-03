@@ -30,6 +30,8 @@ def main():
         file.write(tPath)
         file.close()
 
+    os.system('pip3 install pytesseract')
+    os.system('pip3 install opencv-python')
     os.system('pip3 install pynput')
 
 

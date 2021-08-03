@@ -1,8 +1,3 @@
-#install tesseract for windows https://github.com/UB-Mannheim/tesseract/wiki
-#pip3 install pytesseract
-#pip3 install opencv-python
-
-
 import cv2
 try:
     from PIL import Image
