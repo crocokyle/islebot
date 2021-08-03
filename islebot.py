@@ -239,7 +239,7 @@ def connectionLoop(server, timeout=0):
 def main():
     # Get paths and arguments
     getTesseractPath()
-    parser = argparse.ArgumentParser(description='A bot that will continue attempting to join The Isle servers until it gets in.')
+    parser = argparse.ArgumentParser(description='A bot that allows you to queue up for servers in The Isle and sends you an SMS or email notification when you\'re connected.')
     parser.add_argument('SERVER', type=str, nargs=1,
                         help='The name of the server you want to queue up')
     parser.add_argument('--sms', nargs=1, type=int,
