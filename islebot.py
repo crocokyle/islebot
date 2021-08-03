@@ -157,7 +157,7 @@ def main():
     # Get paths and arguments
     getTesseractPath()
     parser = argparse.ArgumentParser(description='A bot that will continue attempting to join The Isle servers until it gets in.')
-    parser.add_argument('--server', metavar='S', type=str, required=True, nargs='1',
+    parser.add_argument('--server', metavar='S', type=str, required=True, nargs=1,
                         help='The name of the server you want to queue up')
     parser.add_argument('--sms', type=int,
                         help='10-digit phone number you want an SMS notification sent to when successfully connected to the server')
@@ -167,6 +167,7 @@ def main():
     args = parser.parse_args()
     
     # Start the game and wait for the disclaimer
+    print('Launching The Isle')
     launchGame()
     waitForText(["I understand", "EVRIMA", "Greetings"])
 
@@ -183,14 +184,24 @@ def main():
     mouse.leftClick(x,y)
 
     # Find the Filter input box
-    print('Looking for "Filter By Name" text box')
+    print('Waiting for servers to load...')
     x, y = findButtonByColor((155,179,174))
     mouse.setPos(x, y)
     time.sleep(1)
     mouse.leftClick(x,y)
 
     # Enter the server name
+    time.sleep(0.5)
     keyboard.type(str(args.server[0]))
+
+    # Connect to the server
+    print("Analyzing search results...")
+    x, y = findButtonByColor((73,203,174))
+    mouse.setPos(x, y)
+    time.sleep(1)
+    mouse.leftClick(x,y)
+    time.sleep(0.2)
+    mouse.leftClick(x,y)
 
 
 if __name__ == '__main__':
