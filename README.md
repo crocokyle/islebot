@@ -10,9 +10,13 @@ python3 install.py
 - Continue following the prompts to install Tesseract on Windows
 
 ## Usage
-```bash
-python isleboy.py --help
-```
+
+`islebot.py [-h] [--sms SMS] [--email EMAIL] SERVER`
+
+
+`python isleboy.py --help`
+
+
 ### Example
 - Enter the SERVER in a way that provides only one search result
 ```bash
