@@ -23,8 +23,19 @@ from pynput.keyboard import Key, Controller
 keyboard = Controller()
 
 
-class Notifications():
-    pass
+class Notification():
+
+    def __init__(self, type="", contact=""):
+        print("Notifications will be sent to {}".format(contact))
+        self.type = type
+        self.contact = contact
+    
+
+    def send(self):
+        if self.type == "SMS":
+            print('Sending SMS to: {}'.format(self.contact))
+        elif self.type == "Email":
+            print('Sending Email to: {}'.format(self.contact))
 
 class mouse():
     def leftClick(x, y):
@@ -171,10 +182,12 @@ def main():
     
     # Set up notifications
     if args.sms:
-        pass
+        SMS = Notification("SMS", int(args.sms[0]))
+        #SMS.send()
 
     if args.email:
-        pass    
+        EMAIL = Notification("Email", str(args.email[0]))   
+        #EMAIL.send()
 
     # Start the game and wait for the disclaimer
     print('Launching The Isle')
@@ -202,16 +215,19 @@ def main():
 
     # Enter the server name
     time.sleep(0.5)
-    keyboard.type(str(args.server[0]))
+    keyboard.type(str(args.SERVER[0]))
 
     # Connect to the server
     print("Analyzing search results...")
+    # Todo - Add timeout if no results are found (Means server is offline)
     x, y = findButtonByColor((73,203,174))
     mouse.setPos(x, y)
     time.sleep(1)
     mouse.leftClick(x,y)
     time.sleep(0.2)
     mouse.leftClick(x,y)
+
+    # Check if we're connected
 
 
 if __name__ == '__main__':
