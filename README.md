@@ -14,7 +14,7 @@ python3 install.py
 `islebot.py [-h] [--sms SMS] [--email EMAIL] SERVER`
 
 
-`python isleboy.py --help`
+`python islebot.py --help`
 
 
 ### Example
