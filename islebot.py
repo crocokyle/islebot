@@ -16,6 +16,11 @@ import os
 import time
 import win32api, win32con
 import argparse
+import pynput
+from pynput.keyboard import Key, Controller
+
+
+keyboard = Controller()
 
 
 class mouse():
@@ -33,8 +38,6 @@ class mouse():
     def get_cords():
         x,y = win32api.GetCursorPos()
         print('Got mouse coordinates at: {}, {}'.format(x,y))
-
-
 
 def getTesseractPath():
     if os.path.exists("tesseract_path.txt"):
@@ -153,18 +156,15 @@ def waitForText(text):
 def main():
     # Get paths and arguments
     getTesseractPath()
-    parser = argparse.ArgumentParser(description='Queue bot for The Isle.')
-    parser.add_argument('--server', metavar='S', type=str, required=True, nargs='+',
+    parser = argparse.ArgumentParser(description='A bot that will continue attempting to join The Isle servers until it gets in.')
+    parser.add_argument('--server', metavar='S', type=str, required=True, nargs='1',
                         help='The name of the server you want to queue up')
     parser.add_argument('--sms', type=int,
                         help='10-digit phone number you want an SMS notification sent to when successfully connected to the server')
     parser.add_argument('--email', type=str,
                         help='Email address you want a notification sent to when successfully connected to the server')
 
-
     args = parser.parse_args()
-    if not args.server:
-        print("ERROR: You must specify a server to queue up for.")
     
     # Start the game and wait for the disclaimer
     launchGame()
@@ -189,6 +189,8 @@ def main():
     time.sleep(1)
     mouse.leftClick(x,y)
 
+    # Enter the server name
+    keyboard.type(str(args.server[0]))
 
 
 if __name__ == '__main__':

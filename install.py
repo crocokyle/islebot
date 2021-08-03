@@ -30,6 +30,8 @@ def main():
         file.write(tPath)
         file.close()
 
+    os.system('pip3 install pynput')
+
 
 if __name__ == '__main__':
     main()
