@@ -14,10 +14,15 @@ import win32api, win32con
 import argparse
 import pynput
 import psutil
+import json
 from pynput.keyboard import Key, Controller
 
 
+# Globals
 keyboard = Controller()
+coords_file = 'coordinates.json'
+coords_known = False
+coords_cache = {}
 
 
 class Notification():
@@ -33,6 +38,7 @@ class Notification():
             print('Sending SMS to: {}'.format(self.contact))
         elif self.type == "Email":
             print('Sending Email to: {}'.format(self.contact))
+
 
 class mouse():
     def leftClick(x, y):
@@ -51,11 +57,18 @@ class mouse():
         print('Got mouse coordinates at: {}, {}'.format(x,y))
 
 
+    def moveAndClick(x, y):
+        mouse.setPos(x, y)
+        time.sleep(1)
+        mouse.leftClick(x,y)
+
+
 def killTheIsle():
     PROCNAME = "TheIsleClient-Win64-Shipping.exe"
     for proc in psutil.process_iter():
         if proc.name() == PROCNAME:
             proc.kill()
+
 
 def getTesseractPath():
     if os.path.exists("tesseract_path.txt"):
@@ -183,60 +196,57 @@ def waitForText(text, timeout=0, debug=False):
             main()
             return False
 
+
 def launchGame():
     os.system('start steam://rungameid/376210')
 
 
-def connectionLoop(server, timeout=0):
+def connectionLoop(timeout=0):
+    global coords_cache
 
     if timeout:
         start = time.time()
 
     while True: 
-        # Click "Play"
-        x, y = findButtonByText("Play")
-        mouse.setPos(x, y)
-        time.sleep(1)
-        mouse.leftClick(x,y)
+        # Double click the server name
+        x, y = coords_cache['Server']
 
-        # Find the Filter input box
-        print('Waiting for servers to load...')
-        x, y = findButtonByColor((155,179,174))
-        #x, y = findButtonByText("Filter")
-        mouse.setPos(x, y)
-        time.sleep(1)
-        mouse.leftClick(x,y)
-
-        # Enter the server name
-        time.sleep(0.5)
-        keyboard.type(server)
-
-        # Connect to the server
-        print("Analyzing search results...")
-        x, y = findButtonByColor((73,203,174)) # Click the server result
-        mouse.setPos(x, y)
-        time.sleep(1)
-        mouse.leftClick(x,y)
+        mouse.moveAndClick(x, y)
         time.sleep(0.2)
         mouse.leftClick(x,y)
 
         # Did we connect successfully?
-        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "ASSET", "Logout", "Developer"], 60):
+        if not waitForText(["Refresh", "Back", "Options"], 60):
             return True
         else:
-            # If not, click Back
-            x, y = waitForText("Back", timeout=60)
-            mouse.setPos(x, y)
-            time.sleep(1)
-            mouse.leftClick(x,y)
+            # If not, click Refresh
+            x, y = waitForText("Refresh", timeout=60)
+            mouse.moveAndClick(x, y)
 
-        time.sleep(0.05)
         if timeout and (time.time() - start) > timeout:
             return False
 
 
+def storeCoords():
+    global coords_known
+    with open(coords_file, 'w') as f:
+        json.dump(coords_cache, f)
+    coords_known = True
+
+
+def loadCoords():
+    global coords_cache
+    global coords_known
+    with open(coords_file) as f:
+        coords_cache = json.load(f)
+    coords_known = True
+    print('Coordinate cache foun')
+    return coords_cache
+
 
 def main():
+    global coords_cache
+
     # Get paths and arguments
     getTesseractPath()
     parser = argparse.ArgumentParser(description='A bot that allows you to queue up for servers in The Isle and sends you an SMS or email notification when you\'re connected.')
@@ -246,6 +256,8 @@ def main():
                         help='10-digit phone number you want an SMS notification sent to when successfully connected to the server - Currently supports: Verizon, AT&T, T-Mobile, and Google Voice numbers ONLY')
     parser.add_argument('--email', nargs=1, type=str,
                         help='Email address you want a notification sent to when successfully connected to the server')
+    parser.add_argument('--reset', 
+                        help='Resets all cached coordinates from OCR. Run this if your resolution has changed, etc.')
 
     args = parser.parse_args()
     
@@ -256,22 +268,80 @@ def main():
     if args.email:
         EMAIL = Notification("Email", str(args.email[0]))   
 
+    # Reset cache if needed
+    if args.reset and os.path.exists(coords_file):
+        os.remove(coords_file)
+
+    # Load coordinates
+    if not args.reset and os.path.exists(coords_file):
+        coords_cache = loadCoords()
+
     # Start the game and wait for the disclaimer
     print('Launching The Isle')
     launchGame()
     waitForText(["I understand", "EVRIMA", "Greetings"])
 
     # Click "I understand"
-    x, y = findButtonByColor((99,168,131))
-    mouse.setPos(x, y)
-    time.sleep(1)
-    mouse.leftClick(x,y)
-    if connectionLoop(str(args.SERVER[0])):
+    if not coords_known:
+        x, y = findButtonByColor((99,168,131))
+        coords_cache['I understand'] = (x, y)
+    else:
+        x, y = coords_cache['I understand']
+
+    mouse.moveAndClick(x, y)
+
+    # Click "Play"
+    if not coords_known:
+        x, y = findButtonByText("Play")
+        coords_cache['Play'] = (x, y)
+    else:
+        x, y = coords_cache['Play']
+
+    mouse.moveAndClick(x, y)    
+
+    # Find the Filter input box
+    print('Waiting for servers to load...')
+    if not coords_known:
+        x, y = findButtonByColor((155,179,174))
+        #x, y = findButtonByText("Filter")
+        coords_cache["Filter"] = (x, y)
+    else:
+        x, y = coords_cache['Filter']
+    
+    mouse.moveAndClick(x, y)
+
+    # Enter the server name
+    time.sleep(0.5)
+    keyboard.type(str(args.SERVER[0]))
+
+    # Exploratory serach for Refresh to complete coordinates cache
+    if not coords_known:
+        x, y = waitForText("Refresh")
+        print("Found refresh button at {}, {}".format(x, y))
+        coords_cache["Refresh"] = (x, y)
+    else:
+        x, y = coords_cache["Refresh"]
+
+    # Connect to the server
+    print("Analyzing search results...")
+    if not coords_known:
+        x, y = findButtonByColor((73,203,174)) # Find the server result
+        coords_cache['Server'] = (x, y)
+        storeCoords()
+    else:
+        x, y = coords_cache['Server']
+
+    
+    # If connected, send notifications and exit
+    if connectionLoop():
         if args.sms:
             SMS.send()
         if args.email:
             EMAIL.send()
         print("Connected to the server! islebot is shutting down.")
+        exit(0)
+    
+
 
 
 if __name__ == '__main__':
