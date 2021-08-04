@@ -87,6 +87,13 @@ def getTesseractPath():
         exit(code=0)
 
 
+def didGetKicked():
+    if waitForText(["I understand", "EVRIMA", "Greetings"], 10):
+        print("Got kicked by the server.")
+        return True
+    return False
+
+
 def invertImage(img):
     inverted = ImageOps.invert(img)
     return inverted
@@ -104,8 +111,21 @@ def convertToBnW(img):
     return gray
 
 
-def findButtonByColor(color):
+def colorDifference(color1, color2):
+    r1, g1, b1 = color1
+    r2, g2, b2 = color2
+
+    max_diff = 0
+    for i in range(0,2):
+        if abs(color1[i]-color2[i]) > max_diff:
+            max_diff = abs(color1[i]-color2[i])
+    
+    return max_diff
+
+
+def findButtonByColor(color, threshold=0):
     found_color = False
+
     while not found_color:
 
         img = screenGrab(True)
@@ -114,7 +134,7 @@ def findButtonByColor(color):
         y_coords = []
         for x in range(1, img.width): # Iterate through all pixels in the image
             for y in range(1, img.height):
-                if img.getpixel((x, y)) == color: # If the pixel is not transparent
+                if threshold >= colorDifference(img.getpixel((x, y)), color):
                     # Add the coordinates of the pixel to a list
                     x_coords.append(x)
                     y_coords.append(y)
@@ -226,15 +246,19 @@ def connectionLoop(timeout=0):
         start = time.time()
 
     while True: 
+
         # Double click the server name
-        findButtonByColor((73,203,174))
+        findButtonByColor((73,203,174), 5)
         x, y = coords_cache['Server']
+        mouse.moveAndDoubleClick(x, y)
 
-        mouse.moveAndClick(x, y)
-        time.sleep(0.2)
-        mouse.leftClick(x,y)
-
+        # Make sure we didn't get kicked
+        print("Making sure we didn't get kicked...")
+        if didGetKicked():
+            main()
+            break
         # Did we connect successfully?
+        print("Checking to see if we connected successfully...")
         if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 10):
             return True
         else:
@@ -322,11 +346,11 @@ def main():
     # Find the Filter input box
     print('Waiting for servers to load...')
     if not coords_known:
-        #x, y = findButtonByColor((155,179,174))
+        #x, y = findButtonByColor((155,179,174), 10)
         x, y = findButtonByText("Filter")
         coords_cache["Filter"] = (x, y)
     else:
-        findButtonByColor((155,179,174)) # We still need to wait
+        findButtonByColor((155,179,174), 5) # We still need to wait
         x, y = coords_cache['Filter']
     
     mouse.moveAndClick(x, y)
@@ -346,10 +370,11 @@ def main():
     # Connect to the server
     print("Analyzing search results...")
     if not coords_known:
-        x, y = findButtonByColor((73,203,174)) # Find the server result
+        x, y = findButtonByColor((73,203,174), 5) # Find the server result
         coords_cache['Server'] = (x, y)
         storeCoords()
     else:
+        findButtonByColor((73,203,174), 5)
         x, y = coords_cache['Server']
 
     
