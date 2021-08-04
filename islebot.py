@@ -227,7 +227,7 @@ def connectionLoop(timeout=0):
         mouse.leftClick(x,y)
 
         # Did we connect successfully?
-        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 30, debug=True):
+        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 30):
             return True
         else:
             # If not, click Refresh
@@ -267,7 +267,7 @@ def main():
                         help='10-digit phone number you want an SMS notification sent to when successfully connected to the server - Currently supports: Verizon, AT&T, T-Mobile, and Google Voice numbers ONLY')
     parser.add_argument('--email', nargs=1, type=str,
                         help='Email address you want a notification sent to when successfully connected to the server')
-    parser.add_argument('--reset', nargs=1,
+    parser.add_argument('-r', '--reset', action='store_true',
                         help='Resets all cached coordinates from OCR. Run this if your resolution has changed, etc.')
 
     args = parser.parse_args()
