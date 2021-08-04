@@ -6,7 +6,7 @@ except ImportError:
 import pytesseract
 from pytesseract import Output
 import numpy as np
-from PIL import ImageGrab
+from PIL import ImageGrab, ImageOps
 import os
 import time
 from datetime import datetime
@@ -80,6 +80,10 @@ def getTesseractPath():
         exit(code=0)
 
 
+def invertImage(img):
+    inverted = ImageOps.invert(img)
+    return inverted
+
 def screenGrab(color=False):
     img = ImageGrab.grab()
     if not color:
@@ -88,7 +92,7 @@ def screenGrab(color=False):
 
 
 def convertToBnW(img):
-    gray = img.convert('1')
+    gray = img.convert('L')
 
     return gray
 
@@ -132,8 +136,10 @@ def findButtonByText(text):
     print('Searching for "{}" button...'.format(text))
 
     while True:
-
-        data = pytesseract.image_to_data(screenGrab(True), lang='eng', output_type=Output.DICT)
+        img = screenGrab(True)
+        img = invertImage(img)
+        img = convertToBnW(img)
+        data = pytesseract.image_to_data(img, lang='eng', output_type=Output.DICT)
         i = 0
 
         for string in data['text']:
@@ -155,7 +161,7 @@ def findButtonByText(text):
             i+=1
 
 
-def waitForText(text, timeout=0, debug=False):
+def waitForText(text, timeout=0, debug=False, kill=False):
     print('Waiting for text: {} timeout in {}s...'.format(text, timeout))
 
     if timeout:
@@ -163,6 +169,8 @@ def waitForText(text, timeout=0, debug=False):
 
     while True:
         img = screenGrab(True)
+        img = invertImage(img)
+        img = convertToBnW(img)
         data = pytesseract.image_to_data(img, lang='eng', output_type=Output.DICT)
         if debug:
             print(data)
@@ -190,11 +198,13 @@ def waitForText(text, timeout=0, debug=False):
                 i+=1
 
         if timeout and (time.time() - start) > timeout:
-            # Close the game and call main()
-            print("Sorry, we've run in to a problem. Islebot is starting over...")
-            killTheIsle()
-            main()
-            return False
+            if kill:
+                # Close the game and call main()
+                print("Sorry, we've run in to a problem. Islebot is starting over...")
+                killTheIsle()
+                main()
+            else:    
+                return False
 
 
 def launchGame():
@@ -208,6 +218,7 @@ def connectionLoop(timeout=0):
         start = time.time()
 
     while True: 
+
         # Double click the server name
         x, y = coords_cache['Server']
 
@@ -216,11 +227,11 @@ def connectionLoop(timeout=0):
         mouse.leftClick(x,y)
 
         # Did we connect successfully?
-        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "ASSET", "Logout", "Developer"], 60):
+        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 30, debug=True):
             return True
         else:
             # If not, click Refresh
-            x, y = waitForText("Refresh", timeout=60)
+            x, y = coords_cache['Refresh']
             mouse.moveAndClick(x, y)
 
         if timeout and (time.time() - start) > timeout:
@@ -302,8 +313,8 @@ def main():
     # Find the Filter input box
     print('Waiting for servers to load...')
     if not coords_known:
-        x, y = findButtonByColor((155,179,174))
-        #x, y = findButtonByText("Filter")
+        #x, y = findButtonByColor((155,179,174))
+        x, y = findButtonByText("Filter")
         coords_cache["Filter"] = (x, y)
     else:
         findButtonByColor((155,179,174)) # We still need to wait
