@@ -240,7 +240,7 @@ def loadCoords():
     with open(coords_file) as f:
         coords_cache = json.load(f)
     coords_known = True
-    print('Coordinate cache foun')
+    print('Using coordinate cache')
     return coords_cache
 
 
@@ -256,7 +256,7 @@ def main():
                         help='10-digit phone number you want an SMS notification sent to when successfully connected to the server - Currently supports: Verizon, AT&T, T-Mobile, and Google Voice numbers ONLY')
     parser.add_argument('--email', nargs=1, type=str,
                         help='Email address you want a notification sent to when successfully connected to the server')
-    parser.add_argument('--reset', 
+    parser.add_argument('--reset', nargs=1,
                         help='Resets all cached coordinates from OCR. Run this if your resolution has changed, etc.')
 
     args = parser.parse_args()
@@ -306,6 +306,7 @@ def main():
         #x, y = findButtonByText("Filter")
         coords_cache["Filter"] = (x, y)
     else:
+        findButtonByColor((155,179,174)) # We still need to wait
         x, y = coords_cache['Filter']
     
     mouse.moveAndClick(x, y)
