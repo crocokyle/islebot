@@ -221,12 +221,13 @@ def launchGame():
 def connectionLoop(timeout=0):
     global coords_cache
 
-    time.sleep(10)
+    
     if timeout:
         start = time.time()
 
     while True: 
         # Double click the server name
+        findButtonByColor((73,203,174))
         x, y = coords_cache['Server']
 
         mouse.moveAndClick(x, y)
