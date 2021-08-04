@@ -3,9 +3,7 @@ islebot currently uses Tesseract as a Neural Network OCR tool to locate buttons 
 
 ## Installation
 
-`git clone https://github.com/crocokyle/islebot.git`
-
-or [download a release](https://github.com/crocokyle/islebot/releases)
+[Download the latest release](https://github.com/crocokyle/islebot/releases)
 
 `python3 install.py` 
 
