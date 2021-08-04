@@ -11,7 +11,7 @@ islebot currently uses Tesseract as a Neural Network OCR tool to locate buttons 
 
 ## Usage
 
-`islebot.py [-h] [--sms SMS] [--email EMAIL] SERVER`
+`python3 islebot.py [-h] [--sms SMS] [--email EMAIL] SERVER`
 
 
 `python3 islebot.py --help`
