@@ -216,7 +216,7 @@ def connectionLoop(timeout=0):
         mouse.leftClick(x,y)
 
         # Did we connect successfully?
-        if not waitForText(["Refresh", "Back", "Options"], 60):
+        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "ASSET", "Logout", "Developer"], 60):
             return True
         else:
             # If not, click Refresh
