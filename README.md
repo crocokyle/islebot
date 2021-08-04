@@ -22,3 +22,7 @@ or [download a release](https://github.com/crocokyle/islebot/releases)
 ```bash
 python3 islebot.py --sms 8005551234 --email me@mydomain.com Zoo
 ```
+
+## Troubleshooting
+
+If islebot is clicking the wrong areas or doing something it shouldn't, try resetting the coordinates cache by running with the `--reset` flag or by deleting the `coordinates.json` file in the script directory.
