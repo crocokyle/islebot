@@ -62,6 +62,13 @@ class mouse():
         time.sleep(1)
         mouse.leftClick(x,y)
 
+    def moveAndDoubleClick(x, y):
+        mouse.setPos(x, y)
+        time.sleep(1)
+        mouse.leftClick(x,y)
+        time.sleep(0.05)
+        mouse.leftClick(x,y)
+
 
 def killTheIsle():
     PROCNAME = "TheIsleClient-Win64-Shipping.exe"
@@ -214,11 +221,11 @@ def launchGame():
 def connectionLoop(timeout=0):
     global coords_cache
 
+    time.sleep(10)
     if timeout:
         start = time.time()
 
     while True: 
-
         # Double click the server name
         x, y = coords_cache['Server']
 
@@ -227,12 +234,13 @@ def connectionLoop(timeout=0):
         mouse.leftClick(x,y)
 
         # Did we connect successfully?
-        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 30):
+        if waitForText(["Herbivore", "Carnivore", "Eggs", "Humans", "SELECT" "ASSET", "Logout", "Developer"], 10):
             return True
         else:
             # If not, click Refresh
+            print("Refreshing server list...")
             x, y = coords_cache['Refresh']
-            mouse.moveAndClick(x, y)
+            mouse.moveAndDoubleClick(x, y)
 
         if timeout and (time.time() - start) > timeout:
             return False
@@ -328,7 +336,7 @@ def main():
 
     # Exploratory serach for Refresh to complete coordinates cache
     if not coords_known:
-        x, y = waitForText("Refresh")
+        x, y = findButtonByText("Refresh")
         print("Found refresh button at {}, {}".format(x, y))
         coords_cache["Refresh"] = (x, y)
     else:
